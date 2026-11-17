@@ -1,0 +1,116 @@
+{
+  "$schema": "https://calm.finos.org/release/1.3/meta/calm.json",
+  "unique-id": "customer-authentication-architecture",
+  "name": "Customer Authentication Architecture",
+  "description": "Architecture for a service that validates customer credentials and manages session tokens.",
+  "metadata": {
+    "owner": "Platform Team",
+    "version": "1.0.0",
+    "created": "2026-11-16",
+    "description": "Represents the customer authentication service, its database, and their interactions.",
+    "tags": [
+      "learning",
+      "authentication",
+      "demo"
+    ]
+  },
+  "nodes": [
+    {
+      "unique-id": "customer-authentication-service",
+      "node-type": "service",
+      "name": "Customer Authentication Service",
+      "description": "Validates user credentials and manages session tokens for authenticated customer access.",
+      "metadata": {
+        "tech-owner": "Platform Team",
+        "repository": "https://github.com/example/customer-authentication-service",
+        "deployment-type": "container",
+        "sla-tier": "tier-1"
+      },
+      "interfaces": [
+        {
+          "unique-id": "customer-authentication-api",
+          "protocol": "HTTPS",
+          "host": "api.example.com",
+          "port": 443,
+          "path": "/api/v1"
+        }
+      ]
+    },
+    {
+      "unique-id": "customer-authentication-database",
+      "node-type": "database",
+      "name": "Customer Authentication Database",
+      "description": "Stores credential and session-token data used by the Customer Authentication Service.",
+      "interfaces": [
+        {
+          "unique-id": "customer-authentication-database-jdbc",
+          "protocol": "JDBC",
+          "host": "db.example.com",
+          "port": 5432,
+          "database": "customer_authentication"
+        }
+      ]
+    },
+    {
+      "unique-id": "customer",
+      "node-type": "actor",
+      "name": "Customer",
+      "description": "An end user who uses the Customer Authentication Service to authenticate and manage a session."
+    },
+    {
+      "unique-id": "customer-authentication-system",
+      "node-type": "system",
+      "name": "Customer Authentication System",
+      "description": "The overall system comprising the Customer Authentication Service and its database."
+    }
+  ],
+  "relationships": [
+    {
+      "unique-id": "customer-authentication-service-connects-to-database",
+      "metadata": {
+        "latency-sla": "< 100ms",
+        "monitoring": true,
+        "circuit-breaker": true
+      },
+      "relationship-type": {
+        "connects": {
+          "source": {
+            "node": "customer-authentication-service",
+            "interfaces": [
+              "customer-authentication-api"
+            ]
+          },
+          "destination": {
+            "node": "customer-authentication-database",
+            "interfaces": [
+              "customer-authentication-database-jdbc"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "unique-id": "customer-interacts-with-authentication-service",
+      "relationship-type": {
+        "interacts": {
+          "actor": "customer",
+          "nodes": [
+            "customer-authentication-service"
+          ]
+        }
+      }
+    },
+    {
+      "unique-id": "customer-authentication-system-composed-of-service-and-database",
+      "relationship-type": {
+        "composed-of": {
+          "container": "customer-authentication-system",
+          "nodes": [
+            "customer-authentication-service",
+            "customer-authentication-database"
+          ]
+        }
+      }
+    }
+  ]
+}
